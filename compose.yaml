@@ -19,10 +19,7 @@
 ---
 version: "3.0"
 
-networks: #This is used if you have a reverse proxy. I use Nginx Proxy Manager but anything will do
-  proxy: #You can remove this block if you are not planning to use a vpn
-    external:
-      name: proxy
+
       
 services:
   #Plex - used to display the media

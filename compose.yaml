@@ -155,24 +155,24 @@ services:
       - 8181:8181
     restart: unless-stopped
 
-  ---
-services:
-  plex-meta-manager:
-    image: lscr.io/linuxserver/plex-meta-manager:latest
-    container_name: plex-meta-manager
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Etc/UTC
-      - PMM_CONFIG=/config/config.yml #optional
-      - PMM_TIME=03:00 #optional
-      - PMM_RUN=False #optional
-      - PMM_TEST=False #optional
-      - PMM_NO_MISSING=False #optional
-    volumes:
-      - ${BASE_PATH}/plex-meta-manager/config:/config
-      
-    restart: unless-stopped
+  
+  services:
+    plex-meta-manager:
+      image: lscr.io/linuxserver/plex-meta-manager:latest
+      container_name: plex-meta-manager
+      environment:
+        - PUID=1000
+        - PGID=1000
+        - TZ=Etc/UTC
+        - PMM_CONFIG=/config/config.yml #optional
+        - PMM_TIME=03:00 #optional
+        - PMM_RUN=False #optional
+        - PMM_TEST=False #optional
+        - PMM_NO_MISSING=False #optional
+      volumes:
+        - ${BASE_PATH}/plex-meta-manager/config:/config
+        
+      restart: unless-stopped
 
   
     

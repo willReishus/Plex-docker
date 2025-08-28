@@ -73,8 +73,6 @@ services:
     volumes:
       - ${BASE_PATH}/sonarr/config:/config
       - ${MEDIA_SHARE}:/share #Access to the entire share
-    #networks: #Does not connect to overseer if you use NPM
-    #  - proxy
     ports:
       - 8989:8989
     restart: unless-stopped
@@ -91,8 +89,6 @@ services:
       - TZ=${TZ}
     volumes:
       - ${BASE_PATH}/prowlarr/config:/config
-    #networks:
-    #  - proxy
     ports:
       - 9696:9696
     restart: unless-stopped
@@ -109,8 +105,6 @@ services:
     volumes:
       - ${BASE_PATH}/overseer/config:/config
       - ${MEDIA_SHARE}:/share #Access to the entire share
-    #networks:
-    #  - proxy
     ports:
       - 5055:5055
     restart: unless-stopped
@@ -156,8 +150,6 @@ services:
       - TZ=${TZ}
     volumes:
       - ${BASE_PATH}/tautulli:/config
-    networks:
-      - proxy
     ports:
       - 8181:8181
     restart: unless-stopped

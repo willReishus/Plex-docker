@@ -20,6 +20,24 @@ services:
       - ${MEDIA_BASE}/tv:/tv
     restart: unless-stopped
 
+  kometa:
+    image: lscr.io/linuxserver/kometa:latest
+    container_name: kometa
+    # host networking makes it easy to reach Plex at http://127.0.0.1:32400
+    network_mode: host
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - KOMETA_CONFIG=/config/config.yml
+      - KOMETA_TIME=03:00        # daily run time (local)
+      - KOMETA_RUN=false         # set true to run immediately on start
+      - KOMETA_TEST=false
+      - KOMETA_NO_MISSING=false
+    volumes:
+      - ${BASE_PATH}/kometa/config:/config
+    restart: unless-stopped
+
   radarr:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr

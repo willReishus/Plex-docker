@@ -156,7 +156,6 @@ services:
     restart: unless-stopped
 
   
-  services:
     plex-meta-manager:
       image: lscr.io/linuxserver/plex-meta-manager:latest
       container_name: plex-meta-manager

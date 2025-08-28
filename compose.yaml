@@ -1,25 +1,24 @@
-version: "3.0"
+version: "3.8"
 
 services:
-    plex:
-      image: lscr.io/linuxserver/plex:latest
-      container_name: plex
-      network_mode: host
-      runtime: nvidia              # ← this is the key for older Compose/Portainer
-      environment:
-        - PUID=${PUID}
-        - PGID=${PGID}
-        - TZ=${TZ}
-        - VERSION=docker
-        - NVIDIA_VISIBLE_DEVICES=all
-        - NVIDIA_DRIVER_CAPABILITIES=compute,video,utility
-        # - PLEX_CLAIM=${PLEX_CLAIM}   # only for first-ever boot
-      volumes:
-        - ${BASE_PATH}/plex/config:/config
-        - ${BASE_PATH}/plex/transcode:/transcode
-        - ${MEDIA_BASE}/movies:/movies
-        - ${MEDIA_BASE}/tv:/tv
-      restart: unless-stopped
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+    network_mode: host
+    runtime: nvidia
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - VERSION=docker
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,video,utility
+    volumes:
+      - ${BASE_PATH}/plex/config:/config
+      - ${BASE_PATH}/plex/transcode:/transcode
+      - ${MEDIA_BASE}/movies:/movies
+      - ${MEDIA_BASE}/tv:/tv
+    restart: unless-stopped
 
   radarr:
     image: lscr.io/linuxserver/radarr:latest

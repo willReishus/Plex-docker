@@ -101,7 +101,7 @@ services:
       - TZ=${TZ}
     volumes:
       - ${BASE_PATH}/overseer/config:/config
-      - ${MEDIA_SHARE} #Access to the entire share
+      - ${MEDIA_SHARE}:/share #Access to the entire share
     ports:
       - 5055:5055
     restart: unless-stopped

@@ -35,14 +35,14 @@ services:
       - TZ=${TZ}
       - VERSION=docker
       - PLEX_CLAIM=${PLEX_CLAIM}
-    ports:
-      - 32400:32400
     devices:
      - /dev/dri:/dev/dri #Required for plex HW transcoding / QuickSync
     volumes:
       - ${BASE_PATH}/plex/config:/config
       - ${MEDIA_SHARE}/media/tv:/tv
       - ${MEDIA_SHARE}/media/movies:/movies
+    ports:
+      - 32400:32400
     restart: unless-stopped
     
   #Radarr - used to find movies automatically
@@ -138,6 +138,10 @@ services:
     volumes:
       - ${BASE_PATH}/qbittorrent/config:/config
       - ${MEDIA_SHARE}:/share
+    ports:
+      - "8080:8080"        # Web UI (HTTP)
+      - "8694:8694/tcp"    # BitTorrent listening port
+      - "8694:8694/udp"    # DHT/UDP
     restart: unless-stopped
       
   #Tautulli - for plex statistics. Very useful when troubleshooting performance issues

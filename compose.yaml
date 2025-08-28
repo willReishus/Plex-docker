@@ -1,114 +1,82 @@
-# Welcome to my Ultimate Plex Stack!
-#
-# Make sure to rename this file to "docker-compose.yaml" if you are using git clone
-#
-# I was hoping this could maybe help some people out when setting up their stack
-#
-# Environment Variable Examples:
-# PUID = 99
-# GUID = 101
-# TZ = America/Edmonton
-# BASE_PATH = /home/username/docker
-#
-# https://trash-guides.info/Hardlinks/Hardlinks-and-Instant-Moves/ # This can be useful for establishing how the media will be presented below
-# MEDIA_SHARE = /mnt/media   # This can also be renamed to "SHARE" or "MEDIA" this is where you will present your media
-#
-# NOTE: This is not a plug and play solution, some research / customization will be required to make this work as intented
-# Feel free to customize ie: remove/change/add containers as needed - one size does not fit all
-
----
 version: "3.0"
 
-
-      
 services:
-  #Plex - used to display the media
-  #
-  #This can also be replaced by Emby/Jellyfin
   plex:
     image: lscr.io/linuxserver/plex:latest
     container_name: plex
     network_mode: host
     environment:
       - PUID=${PUID}
-      - PGID=${GUID}
+      - PGID=${PGID}
       - TZ=${TZ}
       - VERSION=docker
+      # - PLEX_CLAIM=${PLEX_CLAIM}   # keep ONLY for first run, then remove
     devices:
-     - /dev/dri:/dev/dri #Required for plex HW transcoding / QuickSync
+      - /dev/dri:/dev/dri
     volumes:
       - ${BASE_PATH}/plex/config:/config
-      - ${MEDIA_SHARE}/media/tv:/tv
-      - ${MEDIA_SHARE}/media/movies:/movies
+      - ${MEDIA_BASE}/movies:/movies
+      - ${MEDIA_BASE}/tv:/tv
     restart: unless-stopped
-    
-  #Radarr - used to find movies automatically
+
   radarr:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
     environment:
-      - PUID=111
-      - PGID=321
+      - PUID=${PUID}
+      - PGID=${PGID}
       - TZ=${TZ}
     volumes:
       - ${BASE_PATH}/radarr/config:/config
-      - ${MEDIA_SHARE}:/share #Access to the entire share
-    #networks: #Does not connect to overseer if you use NPM
-    #  - proxy
+      - ${MEDIA_BASE}:/media
+      - ${MEDIA_BASE}/downloads:/downloads
     ports:
       - 7878:7878
     restart: unless-stopped
-    
-  #Sonarr - used to find tv shows automatically
+
   sonarr:
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
     environment:
       - PUID=${PUID}
-      - PGID=${GUID}
+      - PGID=${PGID}
       - TZ=${TZ}
     volumes:
       - ${BASE_PATH}/sonarr/config:/config
-      - ${MEDIA_SHARE}:/share #Access to the entire share
+      - ${MEDIA_BASE}:/media
+      - ${MEDIA_BASE}/downloads:/downloads
     ports:
       - 8989:8989
     restart: unless-stopped
-  
-  
-    
-  #Prowlarr - manages your Sonarr, Radarr and download client
+
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
     environment:
       - PUID=${PUID}
-      - PGID=${GUID}
+      - PGID=${PGID}
       - TZ=${TZ}
     volumes:
       - ${BASE_PATH}/prowlarr/config:/config
     ports:
       - 9696:9696
     restart: unless-stopped
-    
 
-  #Overseer - allows users to request media on their own
   overseerr:
     image: lscr.io/linuxserver/overseerr:latest
     container_name: overseerr
     environment:
       - PUID=${PUID}
-      - PGID=${GUID}
+      - PGID=${PGID}
       - TZ=${TZ}
     volumes:
       - ${BASE_PATH}/overseer/config:/config
-      - ${MEDIA_SHARE}:/share #Access to the entire share
+      - ${MEDIA_BASE}:/media
     ports:
       - 5055:5055
     restart: unless-stopped
-    
-  #Flaresolerr - Used as a proxy server to bypass Cloudflare and DDoS-GUARD protection.
+
   flaresolverr:
-    # DockerHub mirror flaresolverr/flaresolverr:latest
     image: ghcr.io/flaresolverr/flaresolverr:latest
     container_name: flaresolverr
     environment:
@@ -119,47 +87,35 @@ services:
     ports:
       - 8191:8191
     restart: unless-stopped
-      
-  #Qbittorrent - torrenting software
-  #
-  #You can also use RuTorrent, Transmisson or Deluge
+
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
     environment:
       - PUID=${PUID}
-      - PGID=${GUID}
+      - PGID=${PGID}
       - TZ=${TZ}
       - WEBUI_PORT=8080
-      - TORRENTING_PORT=8694 #Make sure to port forward this port in your router so you can seed more effectively
+      - TORRENTING_PORT=8694
     volumes:
       - ${BASE_PATH}/qbittorrent/config:/config
-      - ${MEDIA_SHARE}:/share
+      - ${MEDIA_BASE}/downloads:/downloads
+      - ${MEDIA_BASE}:/media
     ports:
-      - "8080:8080"        # Web UI (HTTP)
-      - "8694:8694/tcp"    # BitTorrent listening port
-      - "8694:8694/udp"    # DHT/UDP
+      - "8080:8080"
+      - "8694:8694/tcp"
+      - "8694:8694/udp"
     restart: unless-stopped
-      
-  #Tautulli - for plex statistics. Very useful when troubleshooting performance issues
+
   tautulli:
     image: lscr.io/linuxserver/tautulli:latest
     container_name: tautulli
     environment:
       - PUID=${PUID}
-      - PGID=${GUID}
+      - PGID=${PGID}
       - TZ=${TZ}
     volumes:
       - ${BASE_PATH}/tautulli:/config
     ports:
       - 8181:8181
     restart: unless-stopped
-
-  
-    
-
-
-
-      
-
- 

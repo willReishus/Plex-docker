@@ -47,8 +47,8 @@ services:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
     environment:
-      - PUID=${PUID}
-      - PGID=${GUID}
+      - PUID=111
+      - PGID=321
       - TZ=${TZ}
     volumes:
       - ${BASE_PATH}/radarr/config:/config

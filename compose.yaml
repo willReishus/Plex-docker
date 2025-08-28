@@ -41,8 +41,6 @@ services:
       - ${BASE_PATH}/plex/config:/config
       - ${MEDIA_SHARE}/media/tv:/tv
       - ${MEDIA_SHARE}/media/movies:/movies
-    ports:
-      - 32400:32400
     restart: unless-stopped
     
   #Radarr - used to find movies automatically

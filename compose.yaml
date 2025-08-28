@@ -34,7 +34,6 @@ services:
       - PGID=${GUID}
       - TZ=${TZ}
       - VERSION=docker
-      - PLEX_CLAIM=${PLEX_CLAIM}
     devices:
      - /dev/dri:/dev/dri #Required for plex HW transcoding / QuickSync
     volumes:

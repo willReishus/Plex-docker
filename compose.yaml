@@ -163,11 +163,6 @@ services:
         - PUID=1000
         - PGID=1000
         - TZ=Etc/UTC
-        - PMM_CONFIG=/config/config.yml #optional
-        - PMM_TIME=03:00 #optional
-        - PMM_RUN=False #optional
-        - PMM_TEST=False #optional
-        - PMM_NO_MISSING=False #optional
       volumes:
         - ${BASE_PATH}/plex-meta-manager/config:/config
         

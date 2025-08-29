@@ -1,3 +1,10 @@
+### .env settings
+#PUID=1000
+#PGID=1000
+#TZ=America/Chicago
+#BASE_PATH=/home/willreishus/docker
+#MEDIA_BASE=/mnt/media
+
 version: "3.8"
 
 services:

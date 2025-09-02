@@ -79,7 +79,7 @@ services:
     restart: unless-stopped
 
   overseerr:
-    image: lscr.io/linuxserver/overseerr:latest
+    image: lscr.io/linuxserver/overseerr:develop
     container_name: overseerr
     environment:
       - PUID=${PUID}

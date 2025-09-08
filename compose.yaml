@@ -16,14 +16,14 @@ services:
     volumes:
       - ${APPDATA}/plex/config:/config
       - ${APPDATA}/plex/transcode:/transcode
-      - ${DATA}/media:/data/media         # <- ONLY the library for Plex
-      - /media/willreishus/Test1/media
+      # MEDIA ONLY (no torrents) — add both drives' media folders
+      - ${DATA}/media:/data/drive1/media
+      - /media/willreishus/Test1/media:/data/drive2/media
     restart: unless-stopped
 
   kometa:
     image: lscr.io/linuxserver/kometa:latest
     container_name: kometa
-    network_mode: host
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -35,7 +35,9 @@ services:
       - KOMETA_NO_MISSING=false
     volumes:
       - ${APPDATA}/kometa/config:/config
-      - ${DATA}/media:/data/media         # helpful for previews/posters
+      # MEDIA ONLY is sufficient for artwork/metadata previews
+      - ${DATA}/media:/data/drive1/media
+      - /media/willreishus/Test1/media:/data/drive2/media
     restart: unless-stopped
 
   radarr:
@@ -47,8 +49,9 @@ services:
       - TZ=${TZ}
     volumes:
       - ${APPDATA}/radarr:/config
-      - ${DATA}:/data/drive1                     # <- ONE mount that includes everything
-      - /media/willreishus/Test1/media:/data/drive2
+      # Mount entire drive roots so Radarr can see torrents & media together
+      - ${DATA}:/data/drive1
+      - /media/willreishus/Test1:/data/drive2
     ports:
       - 7878:7878
     restart: unless-stopped
@@ -62,8 +65,8 @@ services:
       - TZ=${TZ}
     volumes:
       - ${APPDATA}/sonarr:/config
-      - ${DATA}:/data
-      - /media/willreishus/Test1/media/tv
+      - ${DATA}:/data/drive1
+      - /media/willreishus/Test1:/data/drive2
     ports:
       - 8989:8989
     restart: unless-stopped
@@ -90,7 +93,9 @@ services:
       - TZ=${TZ}
     volumes:
       - ${APPDATA}/overseerr:/config
-      - ${DATA}/media:/data/media
+      # Optional: media mounts help with preview thumbnails
+      - ${DATA}/media:/data/drive1/media
+      - /media/willreishus/Test1/media:/data/drive2/media
     ports:
       - 5055:5055
     restart: unless-stopped

@@ -17,6 +17,7 @@ services:
       - ${APPDATA}/plex/config:/config
       - ${APPDATA}/plex/transcode:/transcode
       - ${DATA}/media:/data/media         # <- ONLY the library for Plex
+      - /media/willreishus/Test1/media
     restart: unless-stopped
 
   kometa:
@@ -47,6 +48,7 @@ services:
     volumes:
       - ${APPDATA}/radarr:/config
       - ${DATA}:/data                     # <- ONE mount that includes everything
+      - /media/willreishus/Test1/media/movies
     ports:
       - 7878:7878
     restart: unless-stopped
@@ -61,6 +63,7 @@ services:
     volumes:
       - ${APPDATA}/sonarr:/config
       - ${DATA}:/data
+      - /media/willreishus/Test1/media/tv
     ports:
       - 8989:8989
     restart: unless-stopped

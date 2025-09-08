@@ -48,7 +48,7 @@ services:
     volumes:
       - ${APPDATA}/radarr:/config
       - ${DATA}:/data/drive1                     # <- ONE mount that includes everything
-       - /media/willreishus/Test1/media:/data/drive2
+      - /media/willreishus/Test1/media:/data/drive2
     ports:
       - 7878:7878
     restart: unless-stopped

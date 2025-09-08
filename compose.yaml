@@ -17,7 +17,6 @@ services:
       - ${APPDATA}/plex/config:/config
       - ${APPDATA}/plex/transcode:/transcode
       - ${DATA}/media:/data/media         # <- ONLY the library for Plex
-      -/media/willreishus/data/media
     restart: unless-stopped
 
   kometa:

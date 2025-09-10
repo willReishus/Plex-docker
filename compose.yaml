@@ -123,7 +123,8 @@ services:
       - TORRENTING_PORT=8694
     volumes:
       - ${APPDATA}/qbittorrent:/config
-      - ${DATA}:/data                     # <- ONE mount
+       - ${DATA}:/data/drive1
+      - /media/willreishus/Test1:/data/drive2                  # <- ONE mount
     ports:
       - "8080:8080"
       - "8694:8694/tcp"

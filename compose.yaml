@@ -158,7 +158,8 @@ services:
       - "2468:2468"
     volumes:
       - ${APPDATA}/cross-seed:/config
-      - ${DATA}:/data 
+      - ${DATA}:/data/drive1
+      - /media/willreishus/Test1:/data/drive2 
     command: daemon
     restart: unless-stopped
 

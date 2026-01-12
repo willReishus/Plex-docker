@@ -71,6 +71,20 @@ services:
       - 8989:8989
     restart: unless-stopped
 
+  tunarr:
+    image: ghcr.io/chrisbenincasa/tunarr:latest
+    container_name: tunarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - PLEX_URL=http://192.168.0.197:32400
+    volumes:
+      - ${APPDATA}/tunarr:/config
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr

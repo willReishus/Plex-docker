@@ -82,7 +82,7 @@ services:
     volumes:
       - ${APPDATA}/tunarr:/config
     ports:
-      - "8000:8000"
+      - "8008:8000"
     restart: unless-stopped
 
   prowlarr:

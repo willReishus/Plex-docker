@@ -49,9 +49,10 @@ services:
       - TZ=${TZ}
     volumes:
       - ${APPDATA}/radarr:/config
-      # Mount entire drive roots so Radarr can see torrents & media together
-      - ${DATA}:/data/drive1
-      - /media/willreishus/Test1:/data/drive2
+      - /mnt/vault/media:/data/drive1/media
+      - /mnt/vault/torrents:/data/drive1/torrents
+      - /media/willreishus/Test1/media:/data/drive2/media
+      - /media/willreishus/Test1/torrents:/data/drive2/torrents
     ports:
       - 7878:7878
     restart: unless-stopped

@@ -65,7 +65,7 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
     volumes:
-      - ${APPDATA}/radarr:/config
+      - ${APPDATA}/sonarr:/config
       - /mnt/vault/media:/data/drive1/media
       - /mnt/vault/torrents:/data/drive1/torrents
       - /media/willreishus/Test1/media:/data/drive2/media

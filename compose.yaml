@@ -65,9 +65,11 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
     volumes:
-      - ${APPDATA}/sonarr:/config
-      - ${DATA}:/data/drive1
-      - /media/willreishus/Test1:/data/drive2
+      - ${APPDATA}/radarr:/config
+      - /mnt/vault/media:/data/drive1/media
+      - /mnt/vault/torrents:/data/drive1/torrents
+      - /media/willreishus/Test1/media:/data/drive2/media
+      - /media/willreishus/Test1/torrents:/data/drive2/torrents
     ports:
       - 8989:8989
     restart: unless-stopped

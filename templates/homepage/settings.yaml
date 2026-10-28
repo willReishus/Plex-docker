@@ -1,0 +1,19 @@
+title: ${SERVER_NAME}
+theme: dark
+color: slate
+headerStyle: clean
+statusStyle: dot
+hideVersion: true
+layout:
+  Watch:
+    style: row
+    columns: 3
+  Library:
+    style: row
+    columns: 3
+  Downloads:
+    style: row
+    columns: 2
+  Network:
+    style: row
+    columns: 2

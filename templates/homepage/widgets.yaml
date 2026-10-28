@@ -1,0 +1,13 @@
+- resources:
+    label: Server
+    cpu: true
+    memory: true
+    uptime: true
+- resources:
+    label: Media drive
+    disk: /mnt/data
+- datetime:
+    text_size: md
+    format:
+      dateStyle: medium
+      timeStyle: short

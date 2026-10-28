@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=https://schemas.recyclarr.dev/v8/config-schema.json
+# Recyclarr (docs/04) copies TRaSH-guide quality profiles into Sonarr every day.
+# For smaller files, use the "WEB-1080p" / "WEB-2160p" profiles from https://recyclarr.dev/guide/
+sonarr:
+  series:
+    base_url: http://sonarr:8989
+    api_key: !env_var SONARR_API_KEY
+
+    quality_definition:
+      type: series
+
+    quality_profiles:
+      - trash_id: 9d142234e45d6143785ac55f5a9e8dc9
+        name: Remux + WEB 1080p
+        reset_unmatched_scores:
+          enabled: true
+      - trash_id: dfa5eaae7894077ad6449169b6eb03e0
+        name: Remux + WEB 2160p
+        reset_unmatched_scores:
+          enabled: true

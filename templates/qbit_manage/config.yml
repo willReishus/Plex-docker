@@ -1,0 +1,106 @@
+# qbit_manage rules (docs/06). cron runs it every 30 min through scripts/qbit_manage/run.sh.
+#
+# How deletion works:
+#   1. Something is deleted from the library (in Seerr, Plex, Radarr or Sonarr).
+#      Radarr/Sonarr first move it to /data/drive1/recycle for 7 days (the undo window);
+#      that still counts as a hardlink, so nothing below happens yet.
+#   2. Once no library hardlink is left, tag_nohardlinks tags the torrent "noHL".
+#   3. share_limits lets it seed until it has 2 weeks of seeding time in total,
+#      stops it, and cleanup deletes the torrent and its files.
+# Torrents still in the library keep seeding forever. Tag a torrent "keep" to exempt it.
+#
+# STARTS IN DRY RUN: it only logs what it would do. Read config/logs/qbit_manage.log
+# for a few days, then change dry_run to false (docs/06).
+
+commands:
+  dry_run: true
+  cross_seed: false
+  recheck: false
+  cat_update: false
+  tag_update: true
+  rem_unregistered: false
+  tag_tracker_error: false
+  rem_orphaned: false
+  tag_nohardlinks: true
+  share_limits: true
+  skip_cleanup: false
+  skip_qb_version_check: false
+
+qbt:
+  host: http://qbittorrent:8080
+  user: "${QBIT_USER}"
+  pass: "${QBIT_PASS}"
+
+settings:
+  force_auto_tmm: false
+  tracker_error_tag: issue
+  nohardlinks_tag: noHL
+  share_limits_tag: ~share_limit
+  share_limits_min_seeding_time_tag: MinSeedTimeNotReached
+  share_limits_min_num_seeds_tag: MinSeedsNotMet
+  share_limits_last_active_tag: LastActiveLimitNotReached
+  cat_filter_completed: true
+  share_limits_filter_completed: true
+  tag_nohardlinks_filter_completed: true
+  stalled_tag: stalledDL
+  cat_update_all: true
+  disable_qbt_default_share_limits: true
+  tag_stalled_torrents: true
+
+directory:
+  root_dir: /data/drive1/torrents
+  recycle_bin: /data/drive1/torrents/.RecycleBin
+
+cat:
+  radarr: /data/drive1/torrents/movies
+  tv-sonarr: /data/drive1/torrents/tv
+
+# Only movie/TV torrents are checked. Anything you add by hand (no category) is never touched.
+nohardlinks:
+  global_options:
+    ignore_root_dir: true    # hardlinks between torrents (cross-seeds) don't count as "in the library"
+  radarr:
+  tv-sonarr:
+  cross-seed-link:
+
+share_limits:
+  keep:
+    priority: 1
+    include_any_tags: [keep]
+    max_ratio: -1
+    max_seeding_time: -1
+    cleanup: false
+    add_group_to_tag: false
+  deleted_from_library:
+    priority: 2
+    include_all_tags: [noHL]
+    categories: [radarr, tv-sonarr, cross-seed-link]
+    max_ratio: -1
+    max_seeding_time: 2w        # private trackers usually require 1-2 weeks; check your trackers' rules
+    cleanup: true
+    share_limit_action: Stop
+    add_group_to_tag: true
+  in_library:
+    priority: 999
+    categories: [radarr, tv-sonarr, cross-seed-link]
+    max_ratio: -1
+    max_seeding_time: -1
+    cleanup: false
+    add_group_to_tag: false
+
+recyclebin:
+  enabled: true
+  empty_after_x_days: 3        # files deleted by cleanup wait here 3 days first
+  save_torrents: false
+  split_by_category: false
+
+orphaned:
+  empty_after_x_days: 7
+  max_orphaned_files_to_delete: 50
+
+# Tags each torrent with its tracker's name. Add one line per tracker you use, e.g.
+#   tracker.example.org:
+#     tag: example
+tracker:
+  other:
+    tag: other

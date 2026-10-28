@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://schemas.recyclarr.dev/v8/config-schema.json
+# Recyclarr (docs/04) copies TRaSH-guide quality profiles into Radarr every day.
+# "Remux + WEB" = best quality and BIG files (a 1080p remux is 20-40 GB, 4K 40-80 GB).
+# For smaller files, swap in the "HD Bluray + WEB" / "UHD Bluray + WEB" profiles from
+# https://recyclarr.dev/guide/ (ask your AI to look up their trash_id values).
+radarr:
+  movies:
+    base_url: http://radarr:7878
+    api_key: !env_var RADARR_API_KEY
+
+    quality_definition:
+      type: movie
+
+    quality_profiles:
+      - trash_id: 9ca12ea80aa55ef916e3751f4b874151
+        name: Remux + WEB 1080p
+        reset_unmatched_scores:
+          enabled: true
+      - trash_id: fd161a61e3ab826d3a22d53f935696dd
+        name: Remux + WEB 2160p
+        reset_unmatched_scores:
+          enabled: true

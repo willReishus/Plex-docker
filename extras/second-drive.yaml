@@ -1,0 +1,22 @@
+# A second media drive, seen inside the containers as /data/drive2 (docs/07).
+# It gets its own torrents/ and media/ folders so hardlinks still work on each drive.
+# Enable in .env:  COMPOSE_FILE=compose.yaml:extras/second-drive.yaml  and set DATA2_DIR.
+services:
+  plex:
+    volumes:
+      - ${DATA2_DIR}/media:/data/drive2/media
+  radarr:
+    volumes:
+      - ${DATA2_DIR}:/data/drive2
+  sonarr:
+    volumes:
+      - ${DATA2_DIR}:/data/drive2
+  qbittorrent:
+    volumes:
+      - ${DATA2_DIR}:/data/drive2
+  cross-seed:
+    volumes:
+      - ${DATA2_DIR}:/data/drive2
+  qbit_manage:
+    volumes:
+      - ${DATA2_DIR}:/data/drive2

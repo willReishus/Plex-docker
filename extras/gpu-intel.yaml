@@ -1,0 +1,7 @@
+# Hardware transcoding with Intel Quick Sync (most Intel CPUs with built-in graphics).
+# Needs Plex Pass. Turn on: Plex > Settings > Transcoder > "Use hardware acceleration when available".
+# Enable in .env:  COMPOSE_FILE=compose.yaml:extras/gpu-intel.yaml
+services:
+  plex:
+    devices:
+      - /dev/dri:/dev/dri

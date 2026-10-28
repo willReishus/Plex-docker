@@ -1,0 +1,46 @@
+# Friendly names (docs/05). AdGuard answers every *.lan name with this server's IP,
+# and Caddy (port 80) sends each name to the right app.
+# To add one: copy a block, change the name and port, then run
+#   docker exec caddy caddy reload --config /etc/caddy/Caddyfile
+{
+	auto_https off
+}
+
+# The dashboard
+http://home.lan {
+	reverse_proxy 127.0.0.1:3080
+}
+
+# Unknown or mistyped names (e.g. raddar.lan) go to the dashboard
+http:// {
+	redir http://home.lan/ 302
+}
+
+http://plex.lan {
+	redir / /web/ 302
+	reverse_proxy 127.0.0.1:32400
+}
+http://radarr.lan {
+	reverse_proxy 127.0.0.1:7878
+}
+http://sonarr.lan {
+	reverse_proxy 127.0.0.1:8989
+}
+http://prowlarr.lan {
+	reverse_proxy 127.0.0.1:9696
+}
+http://qbit.lan, http://qbittorrent.lan {
+	reverse_proxy 127.0.0.1:8080
+}
+http://requests.lan, http://seerr.lan {
+	reverse_proxy 127.0.0.1:5055
+}
+http://tautulli.lan {
+	reverse_proxy 127.0.0.1:8181
+}
+http://tunarr.lan {
+	reverse_proxy 127.0.0.1:8008
+}
+http://adguard.lan {
+	reverse_proxy 127.0.0.1:3053
+}

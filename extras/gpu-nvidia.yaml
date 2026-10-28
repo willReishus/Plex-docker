@@ -1,0 +1,9 @@
+# Hardware transcoding with an NVIDIA card. Needs Plex Pass, the NVIDIA driver,
+# and the NVIDIA Container Toolkit installed first (docs/07).
+# Enable in .env:  COMPOSE_FILE=compose.yaml:extras/gpu-nvidia.yaml
+services:
+  plex:
+    runtime: nvidia
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,video,utility

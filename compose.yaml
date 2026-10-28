@@ -1,195 +1,241 @@
-version: "3.8"
+# Home media server: Plex + the "Arr" apps + qBittorrent.
+#
+# Everything is configured from .env (copy .env.example to .env first).
+#
+#   Stage 1, the core, always runs:  plex, radarr, sonarr, prowlarr, qbittorrent, flaresolverr
+#   Upgrades only run when their name is listed in COMPOSE_PROFILES in .env:
+#     requests   seerr (request page) + tautulli (watch stats)        docs/03
+#     quality    recyclarr (TRaSH quality profiles, syncs daily)       docs/04
+#     kometa     kometa (posters, overlays, collections)               docs/04
+#     tunarr     tunarr (fake live-TV channels in Plex)                docs/04
+#     dashboard  homepage (one page with every app)                    docs/05
+#     dns        adguard + caddy (friendly names like radarr.lan)      docs/05
+#     trackers   cross-seed + qbit_manage (private-tracker extras)    docs/06
+#
+# Inside every container the data drive is /data/drive1:
+#   /data/drive1/torrents/...  downloads (qBittorrent)
+#   /data/drive1/media/...     the Plex library (hardlinks of the downloads)
+# Keep both on the SAME drive, or hardlinks stop working and every file takes double space.
+#
+# Apply changes with:  docker compose up -d
+
+x-common-env: &common-env
+  PUID: ${PUID}
+  PGID: ${PGID}
+  TZ: ${TZ}
 
 services:
+  # ---------------------------------------------------------------- Stage 1: core
   plex:
     image: lscr.io/linuxserver/plex:latest
     container_name: plex
-    network_mode: host
-    runtime: nvidia
+    network_mode: host              # Plex finds TVs/phones on the network this way; port 32400
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - VERSION=docker
-      - NVIDIA_VISIBLE_DEVICES=all
-      - NVIDIA_DRIVER_CAPABILITIES=compute,video,utility
+      <<: *common-env
+      VERSION: docker
+      PLEX_CLAIM: ${PLEX_CLAIM:-}   # only needed on the very first start, see docs/02
     volumes:
-      - ${APPDATA}/plex/config:/config
-      - ${APPDATA}/plex/transcode:/transcode
-      # MEDIA ONLY (no torrents) — add both drives' media folders
-      - ${DATA}/media:/data/drive1/media
-      - /media/willreishus/Test1/media:/data/drive2/media
+      - ${APPDATA_DIR}/plex/config:/config
+      - ${APPDATA_DIR}/plex/transcode:/transcode
+      - ${DATA_DIR}/media:/data/drive1/media      # Plex only needs the library, not the downloads
     restart: unless-stopped
 
-  kometa:
-    image: lscr.io/linuxserver/kometa:latest
-    container_name: kometa
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - KOMETA_CONFIG=/config/config.yml
-      - KOMETA_TIME=03:00
-      - KOMETA_RUN=false
-      - KOMETA_TEST=false
-      - KOMETA_NO_MISSING=false
-    volumes:
-      - ${APPDATA}/kometa/config:/config
-      # MEDIA ONLY is sufficient for artwork/metadata previews
-      - ${DATA}/media:/data/drive1/media
-      - /media/willreishus/Test1/media:/data/drive2/media
-    restart: unless-stopped
-
-  radarr:
+  radarr:                            # movies
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
+    environment: *common-env
     volumes:
-      - ${APPDATA}/radarr:/config
-      - /mnt/vault/media:/data/drive1/media
-      - /mnt/vault/torrents:/data/drive1/torrents
-      - /media/willreishus/Test1/media:/data/drive2/media
-      - /media/willreishus/Test1/torrents:/data/drive2/torrents
+      - ${APPDATA_DIR}/radarr:/config
+      - ${DATA_DIR}:/data/drive1    # whole drive, so downloads and library can be hardlinked
     ports:
       - 7878:7878
     restart: unless-stopped
 
-  sonarr:
+  sonarr:                            # TV shows
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
+    environment: *common-env
     volumes:
-      - ${APPDATA}/sonarr:/config
-      - /mnt/vault/media:/data/drive1/media
-      - /mnt/vault/torrents:/data/drive1/torrents
-      - /media/willreishus/Test1/media:/data/drive2/media
-      - /media/willreishus/Test1/torrents:/data/drive2/torrents
+      - ${APPDATA_DIR}/sonarr:/config
+      - ${DATA_DIR}:/data/drive1
     ports:
       - 8989:8989
     restart: unless-stopped
 
-  tunarr:
-    image: ghcr.io/chrisbenincasa/tunarr:latest
-    container_name: tunarr
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - PLEX_URL=http://192.168.0.197:32400
-    volumes:
-      - ${APPDATA}/tunarr:/config
-    ports:
-      - "8008:8000"
-    restart: unless-stopped
-
-  prowlarr:
+  prowlarr:                          # manages torrent sites (indexers) for Radarr and Sonarr
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
+    environment: *common-env
     volumes:
-      - ${APPDATA}/prowlarr:/config
+      - ${APPDATA_DIR}/prowlarr:/config
     ports:
       - 9696:9696
-    restart: unless-stopped
-
-  overseerr:
-    image: lscr.io/linuxserver/overseerr:develop
-    container_name: overseerr
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-    volumes:
-      - ${APPDATA}/overseerr:/config
-      # Optional: media mounts help with preview thumbnails
-      - ${DATA}/media:/data/drive1/media
-      - /media/willreishus/Test1/media:/data/drive2/media
-    ports:
-      - 5055:5055
-    restart: unless-stopped
-
-  flaresolverr:
-    image: ghcr.io/flaresolverr/flaresolverr:latest
-    container_name: flaresolverr
-    environment:
-      - LOG_LEVEL=info
-      - LOG_HTML=false
-      - CAPTCHA_SOLVER=none
-      - TZ=${TZ}
-    ports:
-      - 8191:8191
     restart: unless-stopped
 
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - WEBUI_PORT=8080
-      - TORRENTING_PORT=8694
+      <<: *common-env
+      WEBUI_PORT: 8080
+      TORRENTING_PORT: ${TORRENT_PORT}
     volumes:
-      - ${APPDATA}/qbittorrent:/config
-      - ${DATA}:/data/drive1
-      - /media/willreishus/Test1:/data/drive2                  # <- ONE mount
+      - ${APPDATA_DIR}/qbittorrent:/config
+      - ${DATA_DIR}:/data/drive1
     ports:
-      - "8080:8080"
-      - "8694:8694/tcp"
-      - "8694:8694/udp"
+      - 8080:8080
+      - ${TORRENT_PORT}:${TORRENT_PORT}/tcp
+      - ${TORRENT_PORT}:${TORRENT_PORT}/udp
     restart: unless-stopped
 
-  deluge:
-    image: lscr.io/linuxserver/deluge:latest
-    container_name: deluge
+  flaresolverr:                      # gets Prowlarr past Cloudflare checks on some sites
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Etc/UTC
-      - DELUGE_LOGLEVEL=error #optional
-    volumes:
-      - ${APPDATA}/deluge:/config
-      - ${DATA}:/data    
+      TZ: ${TZ}
+      LOG_LEVEL: info
     ports:
-      - 8112:8112
-      - 6881:6881
-      - 6881:6881/udp
-      - 58846:58846 #optional
+      - 8191:8191
     restart: unless-stopped
 
-    
-  cross-seed:
-    image: ghcr.io/cross-seed/cross-seed:6
-    container_name: cross-seed
-    user: 1000:1000 # this must match your torrent client (cross-seed does not support using PGID and PUID)
-    ports:
-      - "2468:2468"
+  # ---------------------------------------------------------------- requests (docs/03)
+  seerr:                             # request page for family/friends (successor to Overseerr)
+    image: ghcr.io/seerr-team/seerr:latest
+    container_name: seerr
+    profiles: [requests]
+    init: true
+    environment:
+      TZ: ${TZ}
     volumes:
-      - ${APPDATA}/cross-seed:/config
-      - ${DATA}:/data/drive1
-      - /media/willreishus/Test1:/data/drive2 
-    command: daemon
+      - ${APPDATA_DIR}/seerr:/app/config
+    ports:
+      - 5055:5055
     restart: unless-stopped
 
-
-  tautulli:
+  tautulli:                          # who watched what
     image: lscr.io/linuxserver/tautulli:latest
     container_name: tautulli
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
+    profiles: [requests]
+    environment: *common-env
     volumes:
-      - ${APPDATA}/tautulli:/config
+      - ${APPDATA_DIR}/tautulli:/config
     ports:
       - 8181:8181
     restart: unless-stopped
+
+  # ---------------------------------------------------------------- quality / kometa / tunarr (docs/04)
+  recyclarr:                         # pushes TRaSH-guide quality settings into Radarr/Sonarr every day
+    image: ghcr.io/recyclarr/recyclarr:8
+    container_name: recyclarr
+    profiles: [quality]
+    user: ${PUID}:${PGID}
+    environment:
+      TZ: ${TZ}
+      CRON_SCHEDULE: "@daily"
+      RADARR_API_KEY: ${RADARR_API_KEY}
+      SONARR_API_KEY: ${SONARR_API_KEY}
+    volumes:
+      - ${APPDATA_DIR}/recyclarr:/config
+    restart: unless-stopped
+
+  kometa:                            # posters, resolution overlays, "Top IMDb" style collections
+    image: lscr.io/linuxserver/kometa:latest
+    container_name: kometa
+    profiles: [kometa]
+    environment:
+      <<: *common-env
+      KOMETA_CONFIG: /config/config.yml
+      KOMETA_TIME: "03:00"           # runs every night at 3am
+    volumes:
+      - ${APPDATA_DIR}/kometa:/config
+    restart: unless-stopped
+
+  tunarr:                            # 24/7 "TV channels" built from your own library
+    image: ghcr.io/chrisbenincasa/tunarr:latest
+    container_name: tunarr
+    profiles: [tunarr]
+    environment: *common-env
+    volumes:
+      - ${APPDATA_DIR}/tunarr:/config
+    ports:
+      - 8008:8000
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------- dashboard + dns (docs/05)
+  homepage:                          # dashboard at http://home.lan (or http://SERVER_IP:3080)
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    profiles: [dashboard]
+    network_mode: host
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      PORT: 3080
+      HOMEPAGE_ALLOWED_HOSTS: home.lan,${SERVER_IP}:3080,127.0.0.1:3080
+      HOMEPAGE_VAR_PLEX: ${PLEX_TOKEN:-}
+      HOMEPAGE_VAR_RADARR: ${RADARR_API_KEY:-}
+      HOMEPAGE_VAR_SONARR: ${SONARR_API_KEY:-}
+      HOMEPAGE_VAR_PROWLARR: ${PROWLARR_API_KEY:-}
+      HOMEPAGE_VAR_SEERR: ${SEERR_API_KEY:-}
+      HOMEPAGE_VAR_TAUTULLI: ${TAUTULLI_API_KEY:-}
+      HOMEPAGE_VAR_QBIT_USER: ${QBIT_USER:-}
+      HOMEPAGE_VAR_QBIT_PASS: ${QBIT_PASS:-}
+    volumes:
+      - ${APPDATA_DIR}/homepage:/app/config
+      - ${DATA_DIR}:/mnt/data:ro      # for the disk-space widget
+    restart: unless-stopped
+
+  adguard:                           # the house DNS server; answers *.lan with this server's IP
+    image: adguard/adguardhome:latest
+    container_name: adguard
+    profiles: [dns]
+    network_mode: host               # needs port 53; admin page on port 3053
+    volumes:
+      - ${APPDATA_DIR}/adguard/work:/opt/adguardhome/work
+      - ${APPDATA_DIR}/adguard/conf:/opt/adguardhome/conf
+    restart: unless-stopped
+
+  caddy:                             # turns radarr.lan into SERVER_IP:7878 etc. (port 80)
+    image: caddy:2
+    container_name: caddy
+    profiles: [dns]
+    network_mode: host
+    volumes:
+      - ${APPDATA_DIR}/caddy/etc:/etc/caddy:ro
+      - ${APPDATA_DIR}/caddy/data:/data
+      - ${APPDATA_DIR}/caddy/config:/config
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------- trackers (docs/06)
+  cross-seed:                        # finds the same torrent on your other private trackers
+    image: ghcr.io/cross-seed/cross-seed:6
+    container_name: cross-seed
+    profiles: [trackers]
+    user: ${PUID}:${PGID}            # cross-seed ignores PUID/PGID; this must match qBittorrent's user
+    command: daemon
+    environment:
+      PROWLARR_API_KEY: ${PROWLARR_API_KEY}
+      RADARR_API_KEY: ${RADARR_API_KEY}
+      SONARR_API_KEY: ${SONARR_API_KEY}
+      QBIT_USER: ${QBIT_USER}
+      QBIT_PASS: ${QBIT_PASS}
+      CROSS_SEED_INDEXER_IDS: ${CROSS_SEED_INDEXER_IDS:-}
+    volumes:
+      - ${APPDATA_DIR}/cross-seed:/config
+      - ${DATA_DIR}:/data/drive1
+    ports:
+      - 2468:2468
+    restart: unless-stopped
+
+  qbit_manage:                       # deletes a torrent only after it left the library AND seeded 2 weeks
+    image: ghcr.io/stuffanthings/qbit_manage:latest
+    container_name: qbit_manage
+    profiles: [trackers]
+    restart: "no"                    # cron runs it every 30 min via scripts/qbit_manage/run.sh
+    environment:
+      <<: *common-env
+      QBT_RUN: "true"                # one pass, then exit
+      QBT_CONFIG_DIR: /config
+    volumes:
+      - ${APPDATA_DIR}/qbit_manage:/config
+      - ${DATA_DIR}:/data/drive1

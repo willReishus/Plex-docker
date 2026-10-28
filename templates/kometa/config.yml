@@ -1,0 +1,68 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/kometa-team/kometa/nightly/json-schema/config-schema.json
+# Kometa (docs/04): resolution/ribbon overlays on posters, plus IMDb, genre and franchise collections.
+# Runs nightly at 03:00. Run once now:  docker compose run --rm kometa --run
+# Library names below must match your Plex library names exactly.
+
+plex:
+  url: http://${SERVER_IP}:32400
+  token: ${PLEX_TOKEN}
+  timeout: 60
+  clean_bundles: false
+  empty_trash: false
+  optimize: false
+
+tmdb:
+  apikey: ${TMDB_API_KEY}
+  language: en
+  region: US
+
+libraries:
+  Movies:
+    remove_overlays: false
+    schedule_overlays: weekly(sunday)
+    collection_files:
+    - default: basic
+    - default: imdb
+    - default: genre
+    - default: franchise
+    - default: resolution
+    overlay_files:
+    - default: resolution
+      template_variables:
+        use_480p: false
+    - default: ribbon
+  TV Shows:
+    remove_overlays: false
+    schedule_overlays: weekly(sunday)
+    collection_files:
+    - default: basic
+    - default: imdb
+      template_variables:
+        use_lowest: false
+    - default: genre
+    - default: resolution
+    overlay_files:
+    - default: resolution
+      template_variables:
+        use_480p: false
+    - default: ribbon
+
+settings:
+  run_order:
+  - operations
+  - metadata
+  - collections
+  - overlays
+  cache: true
+  cache_expiration: 60
+  asset_directory:
+  - config/assets
+  asset_folders: true
+  sync_mode: append
+  minimum_items: 2
+  delete_below_minimum: true
+  show_missing: false
+  save_report: true
+  tvdb_language: eng
+  overlay_artwork_filetype: webp_lossy
+  overlay_artwork_quality: 90

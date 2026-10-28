@@ -1,0 +1,6 @@
+# Private to each server: passwords, app settings, and the AI's progress notes
+.env
+appdata/
+my-setup.md
+*.log
+__pycache__/

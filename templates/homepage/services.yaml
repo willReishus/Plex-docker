@@ -1,0 +1,74 @@
+# Dashboard tiles (docs/05). href = what your browser opens; widget urls are checked from the server.
+# Delete the tiles for upgrades you haven't switched on, or they show an error.
+# If you set up *.lan names, you can change each href to e.g. http://radarr.lan
+# Edits show up when you refresh the page.
+- Watch:
+    - Plex:
+        icon: plex.png
+        href: http://${SERVER_IP}:32400/web
+        widget:
+          type: plex
+          url: http://127.0.0.1:32400
+          key: "{{HOMEPAGE_VAR_PLEX}}"
+    - Requests:
+        icon: seerr.png
+        href: http://${SERVER_IP}:5055
+        description: Ask for a movie or show
+        widget:
+          type: seerr
+          url: http://127.0.0.1:5055
+          key: "{{HOMEPAGE_VAR_SEERR}}"
+    - Tautulli:
+        icon: tautulli.png
+        href: http://${SERVER_IP}:8181
+        description: What's playing now
+        widget:
+          type: tautulli
+          url: http://127.0.0.1:8181
+          key: "{{HOMEPAGE_VAR_TAUTULLI}}"
+
+- Library:
+    - Radarr:
+        icon: radarr.png
+        href: http://${SERVER_IP}:7878
+        description: Movies
+        widget:
+          type: radarr
+          url: http://127.0.0.1:7878
+          key: "{{HOMEPAGE_VAR_RADARR}}"
+    - Sonarr:
+        icon: sonarr.png
+        href: http://${SERVER_IP}:8989
+        description: TV shows
+        widget:
+          type: sonarr
+          url: http://127.0.0.1:8989
+          key: "{{HOMEPAGE_VAR_SONARR}}"
+    - Prowlarr:
+        icon: prowlarr.png
+        href: http://${SERVER_IP}:9696
+        description: Torrent sites
+        widget:
+          type: prowlarr
+          url: http://127.0.0.1:9696
+          key: "{{HOMEPAGE_VAR_PROWLARR}}"
+
+- Downloads:
+    - qBittorrent:
+        icon: qbittorrent.png
+        href: http://${SERVER_IP}:8080
+        widget:
+          type: qbittorrent
+          url: http://127.0.0.1:8080
+          username: "{{HOMEPAGE_VAR_QBIT_USER}}"
+          password: "{{HOMEPAGE_VAR_QBIT_PASS}}"
+
+- Network:
+    - AdGuard:
+        icon: adguard-home.png
+        href: http://${SERVER_IP}:3053
+        siteMonitor: http://127.0.0.1:3053
+    - Router:
+        icon: router.png
+        href: http://192.168.1.1
+        description: Change this to your router's address
